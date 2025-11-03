@@ -9,11 +9,11 @@ Production-ready Opal Tool written in TypeScript that recommends nearby Stockhol
 - Distance and walking time calculations using the Haversine formula
 - Structured JSON logging and graceful error handling
 - Unit tests via Vitest
-- Dockerized (multi-stage) build targeting Node.js 20
+- Dockerized (multi-stage) build targeting Node.js 22
 
 ## Requirements
 
-- Node.js 20+
+- Node.js 22+
 - npm 9+
 
 ## Installation

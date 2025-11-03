@@ -14,10 +14,10 @@
     "test:watch": "vitest --watch"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "dependencies": {
-    "@optimizely-opal/opal-tool-ocp-sdk": "^1.0.0",
+    "@optimizely-opal/opal-tool-ocp-sdk": "1.0.0-beta.8",
     "ajv": "^8.12.0",
     "ajv-formats": "^2.1.1"
   },

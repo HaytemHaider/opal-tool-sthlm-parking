@@ -28,21 +28,19 @@ const inputSchema: JSONSchemaType<RecommendFacilityArgs> = {
   properties: {
     userLat: { type: 'number', minimum: -90, maximum: 90 },
     userLon: { type: 'number', minimum: -180, maximum: 180 },
-    destinationLat: { type: 'number', minimum: -90, maximum: 90, optional: true },
-    destinationLon: { type: 'number', minimum: -180, maximum: 180, optional: true },
+    destinationLat: { type: 'number', minimum: -90, maximum: 90 },
+    destinationLon: { type: 'number', minimum: -180, maximum: 180 },
     radiusMeters: {
       type: 'integer',
       minimum: 100,
       maximum: 5000,
-      default: DEFAULT_RADIUS,
-      optional: true
+      default: DEFAULT_RADIUS
     },
     maxResults: {
       type: 'integer',
       minimum: 1,
       maximum: 10,
-      default: DEFAULT_MAX_RESULTS,
-      optional: true
+      default: DEFAULT_MAX_RESULTS
     }
   }
 };
