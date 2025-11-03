@@ -5,11 +5,19 @@ import { logger } from './log.js';
 
 const config = loadConfig();
 
-function sendJson(res: http.ServerResponse, statusCode: number, payload: unknown): void {
+type ResponseHeaders = Record<string, string>;
+
+function sendJson(
+  res: http.ServerResponse,
+  statusCode: number,
+  payload: unknown,
+  extraHeaders: ResponseHeaders = {}
+): void {
   const body = JSON.stringify(payload);
   res.writeHead(statusCode, {
     'Content-Type': 'application/json; charset=utf-8',
-    'Content-Length': Buffer.byteLength(body).toString()
+    'Content-Length': Buffer.byteLength(body).toString(),
+    ...extraHeaders
   });
   res.end(body);
 }
@@ -44,13 +52,26 @@ function parseRequestBody(req: http.IncomingMessage): Promise<unknown> {
 }
 
 const server = http.createServer(async (req, res) => {
+  const url = req.url ? new URL(req.url, 'http://localhost') : null;
+  const pathname = url?.pathname ?? '/';
+
   try {
-    if (req.method === 'GET' && req.url?.startsWith('/healthz')) {
+    if (req.method === 'GET' && pathname === '/healthz') {
       sendJson(res, 200, { status: 'ok' });
       return;
     }
 
-    if (req.method === 'POST' && req.url === '/recommendFacility') {
+    if (pathname.toLowerCase() === '/recommendfacility') {
+      if (req.method !== 'POST') {
+        sendJson(
+          res,
+          405,
+          { error: 'Method not allowed' },
+          { Allow: 'POST' }
+        );
+        return;
+      }
+
       const payload = await parseRequestBody(req);
       const result = await parkingTool.recommendFacility(payload);
       sendJson(res, 200, result);

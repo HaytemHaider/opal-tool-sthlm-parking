@@ -43,12 +43,12 @@ npm run dev
 The service listens on `http://localhost:3000`. Available endpoints:
 
 - `GET /healthz` → `{"status":"ok"}`
-- `POST /recommendFacility` → Calls the Opal tool method. Provide JSON matching the input schema.
+- `POST /recommendFacility` (also available as `/recommendfacility`) → Calls the Opal tool method. Provide JSON matching the input schema.
 
 Example request:
 
 ```bash
-curl -X POST http://localhost:3000/recommendFacility \
+curl -X POST http://localhost:3000/recommendfacility \
   -H 'Content-Type: application/json' \
   -d '{
     "userLat": 59.3293,
