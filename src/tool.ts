@@ -1,5 +1,5 @@
-import Ajv, { JSONSchemaType } from 'ajv';
-import addFormats from 'ajv-formats';
+import AjvImport, { type JSONSchemaType, type Options as AjvOptions } from 'ajv';
+import addFormatsImport from 'ajv-formats';
 import * as sdk from '@optimizely-opal/opal-tool-ocp-sdk';
 import { getAvailability, getFacilities } from './data.js';
 import { estimateWalkMinutes, haversineDistanceMeters } from './geo.js';
@@ -7,10 +7,30 @@ import { loadConfig } from './config.js';
 import { logger, Logger } from './log.js';
 import { ServiceConfig, RecommendFacilityArgs, FacilityRecommendation } from './types.js';
 
+type ValidateFunction<T> = {
+  (data: unknown): data is T;
+  errors?: unknown;
+};
+
+interface AjvLike {
+  compile<T>(schema: unknown): ValidateFunction<T>;
+}
+
+
 const DEFAULT_RADIUS = 1500;
 const DEFAULT_MAX_RESULTS = 5;
 
-const { OpalTool: OpalToolBase } = sdk as { OpalTool?: new (definition: unknown) => unknown };
+type AjvConstructor = new (options?: AjvOptions) => AjvLike;
+
+const AjvCtor: AjvConstructor =
+  (AjvImport as unknown as { default?: AjvConstructor }).default ??
+  (AjvImport as unknown as AjvConstructor);
+
+const addFormats =
+  (addFormatsImport as unknown as { default?: (instance: AjvLike) => unknown }).default ??
+  ((addFormatsImport as unknown) as (instance: AjvLike) => unknown);
+
+const { OpalTool: OpalToolBase } = sdk as { OpalTool?: typeof FallbackTool };
 
 class FallbackTool {
   definition: unknown;
@@ -19,7 +39,7 @@ class FallbackTool {
   }
 }
 
-const BaseTool = OpalToolBase ?? FallbackTool;
+const BaseTool: typeof FallbackTool = OpalToolBase ?? FallbackTool;
 
 const inputSchema: JSONSchemaType<RecommendFacilityArgs> = {
   type: 'object',
@@ -28,19 +48,21 @@ const inputSchema: JSONSchemaType<RecommendFacilityArgs> = {
   properties: {
     userLat: { type: 'number', minimum: -90, maximum: 90 },
     userLon: { type: 'number', minimum: -180, maximum: 180 },
-    destinationLat: { type: 'number', minimum: -90, maximum: 90 },
-    destinationLon: { type: 'number', minimum: -180, maximum: 180 },
+    destinationLat: { type: 'number', minimum: -90, maximum: 90, nullable: true },
+    destinationLon: { type: 'number', minimum: -180, maximum: 180, nullable: true },
     radiusMeters: {
       type: 'integer',
       minimum: 100,
       maximum: 5000,
-      default: DEFAULT_RADIUS
+      default: DEFAULT_RADIUS,
+      nullable: true
     },
     maxResults: {
       type: 'integer',
       minimum: 1,
       maximum: 10,
-      default: DEFAULT_MAX_RESULTS
+      default: DEFAULT_MAX_RESULTS,
+      nullable: true
     }
   }
 };
@@ -69,7 +91,7 @@ const outputSchema = {
   }
 };
 
-const ajv = new Ajv({ useDefaults: true, allErrors: true, strict: true });
+const ajv = new AjvCtor({ useDefaults: true, allErrors: true, strict: true });
 addFormats(ajv);
 
 const validateInput = ajv.compile(inputSchema);

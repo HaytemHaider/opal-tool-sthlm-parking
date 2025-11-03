@@ -121,10 +121,22 @@ function normalizeFacilityMetadata(
 ): FacilityMetadata | null {
   const idValue = raw.id ?? raw.Id ?? raw.facilityId ?? raw.FacilityId;
   const nameValue = raw.name ?? raw.Name ?? raw.siteName ?? raw.SiteName;
-  const latValue =
-    raw.lat ?? raw.latitude ?? raw.Latitude ?? raw.position?.['lat'] ?? raw.Position?.['Lat'];
-  const lonValue =
-    raw.lon ?? raw.longitude ?? raw.Longitude ?? raw.position?.['lon'] ?? raw.Position?.['Lon'];
+
+  const positionValue = raw.position ?? raw.Position;
+  const positionRecord =
+    typeof positionValue === 'object' && positionValue !== null
+      ? (positionValue as Record<string, unknown>)
+      : undefined;
+
+  let latValue = raw.lat ?? raw.latitude ?? raw.Latitude;
+  if (latValue === undefined && positionRecord) {
+    latValue = positionRecord.lat ?? positionRecord.Lat ?? positionRecord.latitude ?? positionRecord.Latitude;
+  }
+
+  let lonValue = raw.lon ?? raw.longitude ?? raw.Longitude;
+  if (lonValue === undefined && positionRecord) {
+    lonValue = positionRecord.lon ?? positionRecord.Lon ?? positionRecord.longitude ?? positionRecord.Longitude;
+  }
 
   if (!idValue || !nameValue || latValue === undefined || lonValue === undefined) {
     return null;
