@@ -1,7 +1,8 @@
 import http from 'node:http';
 import { loadConfig } from './config.js';
-import parkingTool from './tool.js';
+import { UpstreamServiceError } from './errors.js';
 import { logger } from './log.js';
+import parkingTool from './tool.js';
 
 const config = loadConfig();
 
@@ -80,6 +81,22 @@ const server = http.createServer(async (req, res) => {
 
     sendJson(res, 404, { error: 'Not found' });
   } catch (error) {
+    if (error instanceof UpstreamServiceError) {
+      const causeMessage =
+        error.cause instanceof Error
+          ? error.cause.message
+          : error.cause !== undefined
+            ? String(error.cause)
+            : undefined;
+
+      logger.error('Upstream service unavailable', {
+        service: error.service,
+        cause: causeMessage
+      });
+      sendJson(res, 503, { error: 'Upstream service unavailable', service: error.service });
+      return;
+    }
+
     if (error instanceof Error && error.message === 'Invalid input') {
       sendJson(res, 400, { error: error.message, details: (error as Error & { details?: unknown }).details });
       return;

@@ -1,3 +1,4 @@
+import { UpstreamServiceError } from './errors.js';
 import { Logger } from './log.js';
 import {
   AvailabilityResult,
@@ -110,9 +111,15 @@ async function fetchWithRetries<T>(
     }
   }
 
-  throw lastError instanceof Error
-    ? lastError
-    : new Error(`Failed to fetch URL ${url}: ${String(lastError)}`);
+  if (lastError instanceof UpstreamServiceError) {
+    throw lastError;
+  }
+
+  const cause = lastError instanceof Error ? lastError : new Error(String(lastError));
+
+  throw new UpstreamServiceError('stockholmParkingApi', `Failed to fetch upstream resource: ${url}`, {
+    cause
+  });
 }
 
 function normalizeFacilityMetadata(
