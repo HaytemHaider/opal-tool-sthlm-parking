@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM node:20-slim AS builder
+FROM node:22-slim AS builder
 WORKDIR /app
 
 COPY package.json ./
@@ -13,7 +13,7 @@ COPY src ./src
 RUN npm run build
 RUN npm prune --omit=dev
 
-FROM node:20-slim AS runner
+FROM node:22-slim AS runner
 ENV NODE_ENV=production
 WORKDIR /app
 

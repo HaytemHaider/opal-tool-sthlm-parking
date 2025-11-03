@@ -9,11 +9,11 @@ Production-ready Opal Tool written in TypeScript that recommends nearby Stockhol
 - Distance and walking time calculations using the Haversine formula
 - Structured JSON logging and graceful error handling
 - Unit tests via Vitest
-- Dockerized (multi-stage) build targeting Node.js 20
+- Dockerized (multi-stage) build targeting Node.js 22
 
 ## Requirements
 
-- Node.js 20+
+- Node.js 22+
 - npm 9+
 
 ## Installation
@@ -43,12 +43,12 @@ npm run dev
 The service listens on `http://localhost:3000`. Available endpoints:
 
 - `GET /healthz` → `{"status":"ok"}`
-- `POST /recommendFacility` → Calls the Opal tool method. Provide JSON matching the input schema.
+- `POST /recommendFacility` (also available as `/recommendfacility`) → Calls the Opal tool method. Provide JSON matching the input schema.
 
 Example request:
 
 ```bash
-curl -X POST http://localhost:3000/recommendFacility \
+curl -X POST http://localhost:3000/recommendfacility \
   -H 'Content-Type: application/json' \
   -d '{
     "userLat": 59.3293,
